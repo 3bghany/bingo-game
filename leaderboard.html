@@ -148,6 +148,9 @@
         let medalIcon = "";
         if (index < 3) {
             medalIcon = `<img src="${medalImages[index]}" alt="Medal">`;
+        }else
+        {
+          medalIcon=index+".";
         }
 
         listItem.innerHTML = `

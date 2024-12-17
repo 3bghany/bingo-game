@@ -242,9 +242,9 @@ async function saveLeaderboardAndRedirect() {
         if (response.ok) {
 
             const responseData = await response.json();
-            console.log( responseData[0]);
+            console.log( responseData.message);
 
-            let player_data={id:responseData[1],name: username, questions: score};
+            let player_data={id:responseData.id,name: username, questions: score};
             localStorage.setItem('player', JSON.stringify(player_data));
         } else {
             console.error('Failed to add data');
@@ -255,7 +255,7 @@ async function saveLeaderboardAndRedirect() {
 
     setTimeout(() => {
       window.location.href = 'leaderboard.html';
-    }, 2000);
+    }, 20000);
     }
 
     startBtn.addEventListener("click", () => {
