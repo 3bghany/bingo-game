@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="imgs/astrazeneca-logo.png" type="image/x-icon">
+
+    <title>Enter Your Name</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-image: url(imgs/1-100.jpg);
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        h1 {
+            color: #e6b147;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2rem;
+        }
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        input[type="text"] {
+            font-size: 1em;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #CE9C3B;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 150px;
+            text-align: center;
+        }
+        button:hover {
+            background-color: #e6b147;
+        }
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            input[type="text"] {
+                font-size: 0.9em;
+                padding: 8px;
+            }
+            button {
+                font-size: 0.9em;
+                padding: 8px 16px;
+            }
+        }
+        @media (max-width: 480px) {
+            body {
+                background-image: url(imgs/moble-bg.jpg); /* Mobile-specific background image */
+            }
+            h1 {
+                font-size: 1.2rem;
+            }
+            input[type="text"] {
+                font-size: 0.8em;
+                padding: 6px;
+            }
+            button {
+                font-size: 0.8em;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Enter Your Name</h1>
+    <div class="input-container">
+        <input type="text" id="username" placeholder="Enter your name">
+        <button onclick="submitName()">Start Game</button>
+    </div>
+
+    <script>
+        function submitName() {
+            const username = document.getElementById('username').value;
+            if (username) {
+                localStorage.setItem('username', username);
+                window.location.href = 'index.html'; // Redirect to the game page
+            } else {
+                alert("Please enter your name!");
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="imgs/astrazeneca-logo.png" type="image/x-icon">
+  <title>Bingo Game with Leaderboard</title>
+  <style>
+
+      body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0; /* Remove default margin */
+  background-image: url(imgs/1-100.jpg);
+  background-repeat: no-repeat;
+  background-size: cover; 
+  background-position: center; 
+  background-attachment: fixed; 
+  display: flex; /* Enable flexbox */
+  flex-direction: column; /* Stack elements vertically */
+  justify-content: center; /* Center vertically */
+  align-items: center; /* Center horizontally */
+  min-height: 100vh; /* Ensure the body takes up full viewport height */
+}
+  
+#question {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      color: #fffdfd;
+      background-color: #850051; /* Slightly transparent background */
+      padding: 15px 20px;
+      border-radius: 10px;
+      border: 2px solid #ddd;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adds a subtle shadow */
+      display: inline-block; /* Makes it size to content */
+      max-width: 80%; /* Prevents the box from being too wide */
+      word-wrap: break-word; /* Handles long text gracefully */
+    }
+  
+#start-btn{
+  font-size: 1.5em;
+      color: #333;
+      background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent background */
+      border-radius: 10px;
+      border: 2px solid #ddd;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adds a subtle shadow */
+      word-wrap: break-word; /* Handles long text gracefully */
+      cursor: pointer;
+}
+#player-name{
+  color: #ddd;
+  margin-bottom: 10px;
+}
+    .bingo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      max-width: max-content;
+      margin: 20px auto;
+    }
+  
+    .bingo-cell {
+      padding: 15px;
+      background-color: #f9f9f9;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      font-size: 1em;
+      font-weight: bold;
+      color: #333;
+      cursor: pointer;
+      transition: transform 0.3s, background-color 0.3s;
+    }
+  
+    .bingo-cell:hover {
+      transform: scale(1.1); /* Slight zoom on hover */
+      background-color: #e0e0e0;
+    }
+  
+    .bingo-cell.correct {
+      background-color: #4caf50;
+      color: white;
+      pointer-events: none;
+      transform: none; /* Disable hover effect */
+    }
+  
+    .bingo-cell.incorrect {
+      background-color: #f44336;
+      color: white;
+      pointer-events: none;
+      transform: none; /* Disable hover effect */
+      animation: flash 0.5s;
+    }
+  
+    @keyframes flash {
+  0% { background-color: #f44336; }
+  100% { background-color: #f9f9f9; }
+}
+    /* Stretch the last three cells to fill the last row */
+    .bingo-cell.stretch {
+      grid-column: span 4; /* Spans across all columns */
+      text-align: center;
+      font-size: 1.2em;
+      padding: 20px;
+      font-weight: bold;
+      background-color: #ffeb3b;
+      color: #333;
+      border: 2px solid #ddd;
+    }
+
+    @media (max-width: 768px) {
+  .bingo-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 boxes per row for tablets and mobile devices */
+  }
+
+  .bingo-cell {
+    font-size: 0.9em; /* Slightly larger font on smaller devices */
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+                background-image: url(imgs/moble-bg.jpg); /* Mobile-specific background image */
+            }
+  .bingo-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 boxes per row for very small screens */
+  }
+
+  .bingo-cell {
+    font-size: 0.8em; /* Adjust font size for smaller mobile screens */
+  }
+}
+  </style>
+  
+  
+</head>
+<body>
+  <div id="question">Let's start</div>
+  <div id="player-name">Welcome, <span id="username"></span>!</div>
+  <button id="start-btn">Start</button>
+  <div class="bingo-grid" id="bingo-grid" style="display: none;"></div>
+
+  <script>
+    const questions = [
+      { question: "Cholesterol-lowering medications that help prevent heart disease.", answer: "Statins" },
+      { question: "Following prescribed medication and treatment plans as directed.", answer: "Adherence" },
+      { question: "Unintended reactions to medications that may occur alongside the intended effects.", answer: "Side effects" },
+      { question: "Providing guidance and education to patients on medication use and health management.", answer: "Counseling" },
+      { question: "Keeping track of symptoms, side effects, or progress related to medication use", answer: "Monitor" },
+      { question: "Essential antioxidant for energy production in cells.", answer: "Coenzyme Q10" },
+      { question: "Required for blood clotting and bone health.", answer: "Vitamin K" },
+      { question: "Beneficial for heart health and inflammation regulation.", answer: "Omega-3 Fatty Acids" },
+      { question: "Adding nutrients through supplements to address deficiencies.", answer: "Supplementation" },
+      { question: "Advice on food choices for optimal health", answer: "Dietary Recommendations" },
+      { question: "Comprehensive approach to optimizing medication use and health outcomes.", answer: "MTM" },
+      { question: "Essential for nerve function and energy metabolism", answer: "B Vitamins" },
+      { question: "Crucial for musculoskeletal health and immune function.", answer: "Vitamin D" },
+      { question: "Important for muscle function and energy production", answer: "Magnesium" },
+      { question: "Is a comprehensive record of the patient’s medications, and other dietary supplements.", answer: "Personal medication record " }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    const grid = document.getElementById("bingo-grid");
+    const questionElement = document.getElementById("question");
+    const startBtn = document.getElementById("start-btn");
+
+    // Retrieve the player's name from localStorage
+    const username = localStorage.getItem('username');
+    document.getElementById("username").textContent = username;
+
+    function populateGrid() {
+  grid.innerHTML = "";
+  
+  // Shuffle the answers to display them in a random order
+  const answers = shuffleArray(
+    questions.map((q) => q.answer)
+  );
+
+  // Now, distribute the shuffled answers into the grid
+  answers.forEach((answer) => {
+    const cell = document.createElement("div");
+    cell.classList.add("bingo-cell");
+    cell.textContent = answer;
+    cell.addEventListener("click", () => checkAnswer(answer, cell));
+    grid.appendChild(cell);
+  });
+}
+
+
+function checkAnswer(selectedAnswer, cell) {
+  const correctAnswer = questions[currentQuestionIndex].answer;
+
+  if (selectedAnswer === correctAnswer) {
+    cell.classList.add("correct");
+    score++;
+  } else {
+    cell.classList.add("incorrect");
+
+    // Allow the incorrect answer to be chosen again by removing the "pointer-events: none"
+    setTimeout(() => {
+      cell.classList.remove("incorrect");
+    }, 500); // Optional: Adds a brief delay for feedback
+  }
+
+  currentQuestionIndex++;
+
+  if (currentQuestionIndex < questions.length) {
+    questionElement.textContent = questions[currentQuestionIndex].question;
+  } else {
+    questionElement.textContent = "Congratulations! You completed the game!";
+    grid.style.pointerEvents = "none";
+    saveLeaderboardAndRedirect();
+  }
+}
+
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function saveLeaderboardAndRedirect() {
+      // Save the player's name and score to localStorage
+      const playerData = { name: username, score: score };
+      let leaderboardData = JSON.parse(localStorage.getItem('leaderboardData')) || [];
+
+      leaderboardData.push(playerData);
+      leaderboardData.sort((a, b) => b.score - a.score);
+      localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData));
+
+      // Redirect to the leaderboard page
+      window.location.href = 'leaderboard.html';
+    }
+
+    startBtn.addEventListener("click", () => {
+      currentQuestionIndex = 0;
+      score = 0;
+      questionElement.textContent = questions[currentQuestionIndex].question;
+      populateGrid();
+      grid.style.display = "grid";
+      startBtn.style.display = "none";
+    });
+  </script>
+</body>
+</html>
