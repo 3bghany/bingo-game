@@ -58,6 +58,11 @@
       margin: 10px 0;
       font-size: 18px;
     }
+    .leaderboard-item img {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+      }
 
     /* Mobile adjustments */
     @media (max-width: 480px) {
@@ -74,21 +79,110 @@
 <body>
   <h1>Leaderboard</h1>
   <div class="leaderboard-container">
-    <ul class="leaderboard" id="leaderboard-list">
+    <ul class="leaderboard" id="leaderboard">
       <!-- Leaderboard items will be dynamically added here -->
     </ul>
+    <ul id="player" class="leaderboard" >
+      <!-- Leaderboard items will be injected here -->
+  </ul>
   </div>
 
   <script>
-    const leaderboardData = JSON.parse(localStorage.getItem('leaderboardData')) || [];
-    const leaderboardList = document.getElementById("leaderboard-list");
+    // const socket = new WebSocket('wss://localhost:8080');  // local websocket
+    const socket = new WebSocket('wss://26c706bf-7298-4879-8899-95ab9243c9eb-00-23hoybkht0ux4.janeway.replit.dev');  // replit websocket
+      let leaderboardElments = [];
+      
+      socket.onopen = () => console.log('Connected to WebSocket server');
 
-    leaderboardData.forEach((item, index) => {
-      const listItem = document.createElement("li");
-      listItem.classList.add("leaderboard-item");
-      listItem.textContent = `${index + 1}. ${item.name}: ${item.score}`;
-      leaderboardList.appendChild(listItem);
+      socket.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          console.log('New leaderboard data:', data);
+          updateLeaderboard(data);
+      };
+
+      socket.onclose = () => console.log('Disconnected from WebSocket server');   
+
+    function updateLeaderboard(data) {
+      // Your logic to update leaderboard UI
+      console.log("Leaderboard updated with: ", data);
+      loadTimes(data);
+    }
+
+    const DataURL =
+      "https://reactionacademy.org/wp-json/stellar/v1/top3";
+    async function leaderboardData() {
+      try {
+        const response = await fetch(DataURL, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        const data = await response.json();
+          leaderboardElments = data;
+          loadTimes();
+      } catch (error) {
+        console.error("Error fetching leaderboard data:", error);
+        return [];
+      }
+    }
+    async function loadTimes(data = null) {
+    if (data) {
+        leaderboardElments = data;
+    }
+
+    const leaderboard = document.getElementById("leaderboard");
+    leaderboard.innerHTML = "";
+
+    // Define medal images for the top 3 players
+    const medalImages = [
+        "imgs/gold-medal.png",
+        "imgs/silver-medal.png",
+        "imgs/bronze-medal.png",
+    ];
+
+    // Populate the leaderboard with `times`
+    leaderboardElments.forEach((el, index) => {
+        const listItem = document.createElement("li");
+        listItem.className = "leaderboard-item";
+
+        // Add medal icon for the top 3 players
+        let medalIcon = "";
+        if (index < 3) {
+            medalIcon = `<img src="${medalImages[index]}" alt="Medal">`;
+        }
+
+        listItem.innerHTML = `
+            <span>${medalIcon} ${el.name}</span>
+            <span>${el.questions}</span>
+        `;
+        leaderboard.appendChild(listItem);
     });
+    // Fetch player data from localStorage
+    const player = JSON.parse(localStorage.getItem("player")) || null;
+
+    if (player && !search(player.id) && leaderboardElments.length > 2) {
+      const p=document.createElement("p");
+      p.className = "separator";
+      p.innerHTML=`...`;
+      leaderboard.appendChild(p);
+      
+      // Add player entry to the leaderboard
+      const playerLi = document.createElement("li");
+      playerLi.className = "leaderboard-item player-li";
+
+      playerLi.innerHTML = `
+          <span>${player.name}</span>
+          <span>${player.questions}</span>`;
+      leaderboard.appendChild(playerLi);
+    }
+}
+
+function search(index) {
+    // Use `some` to find if the player exists in `times`
+    return leaderboardElments.some((time) => time.id == index);
+}
+
+    // Load times when the page is ready
+    window.onload = leaderboardData;
   </script>
 </body>
 </html>

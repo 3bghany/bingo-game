@@ -136,8 +136,8 @@
   
 </head>
 <body>
-  <div id="question">Let's start</div>
-  <div id="player-name">Welcome, <span id="username"></span>!</div>
+  <div id="question">Bingo Game</div>
+  <div id="player-name">Hello, <span id="username"></span>!</div>
   <button id="start-btn">Start</button>
   <div class="bingo-grid" id="bingo-grid" style="display: none;"></div>
 
@@ -224,17 +224,38 @@ function checkAnswer(selectedAnswer, cell) {
       return array;
     }
 
-    function saveLeaderboardAndRedirect() {
-      // Save the player's name and score to localStorage
-      const playerData = { name: username, score: score };
-      let leaderboardData = JSON.parse(localStorage.getItem('leaderboardData')) || [];
 
-      leaderboardData.push(playerData);
-      leaderboardData.sort((a, b) => b.score - a.score);
-      localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData));
+async function saveLeaderboardAndRedirect() {
+      const dataURL = 'https://reactionacademy.org/wp-json/stellar/v1/leaderboard';
+    try {
+        const response = await fetch(dataURL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: username,
+                questions: score
+            })
+        });
 
-      // Redirect to the leaderboard page
+        if (response.ok) {
+
+            const responseData = await response.json();
+            console.log( responseData[0]);
+
+            let player_data={id:responseData[1],name: username, questions: score};
+            localStorage.setItem('player', JSON.stringify(player_data));
+        } else {
+            console.error('Failed to add data');
+        }
+    } catch (error) {
+        console.error('Error adding leaderboard data:', error);
+    }
+
+    setTimeout(() => {
       window.location.href = 'leaderboard.html';
+    }, 2000);
     }
 
     startBtn.addEventListener("click", () => {
