@@ -226,7 +226,7 @@ function checkAnswer(selectedAnswer, cell) {
 
 
 async function saveLeaderboardAndRedirect() {
-      const dataURL = 'https://reactionacademy.org/wp-json/stellar/v1/leaderboard';
+      const dataURL = 'http://localhost/wordpress-6.6.2/wordpress/wp-json/stellar/v1/leaderboard';
     try {
         const response = await fetch(dataURL, {
             method: 'POST',
@@ -255,7 +255,7 @@ async function saveLeaderboardAndRedirect() {
 
     setTimeout(() => {
       window.location.href = 'leaderboard.html';
-    }, 2000);
+    }, 20000);
     }
 
     startBtn.addEventListener("click", () => {
